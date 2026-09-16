@@ -788,8 +788,10 @@
     // otros clientes antes de tiempo).
     function updateByNic(nic, data) {
       var norm = String(nic || '').trim();
+      // No se reasigna fecha_hora aquí: al editar se conserva la fecha
+      // original del registro (regla 12 del manual maestro). La fecha
+      // nueva solo corresponde a un registro recién creado (ver create()).
       var row = mapDataToRow(data);
-      row.fecha_hora = new Date().toISOString();
       return supabaseClient
         .from(TABLE)
         .update(row)
@@ -805,6 +807,47 @@
           }
           if (idx !== -1) records[idx] = rec; else records.unshift(rec);
           return rec;
+        });
+    }
+
+    // Actualiza por NIC, pero SOLO para el formulario público (rol "anon").
+    // A diferencia de updateByNic() (usado por el panel admin, que sí tiene
+    // permiso directo de UPDATE), esta función llama a la función RPC
+    // actualizar_contacto_publico — un SECURITY DEFINER de superficie
+    // mínima que solo puede tocar NOMBRE/CORREO/TELEFONO de una fila
+    // localizada por NIC, sin exponer datos y sin poder tocar NIC, OFICINA
+    // ni fecha_hora. Así el cliente público puede mantener actualizados
+    // sus propios datos de contacto sin que se le abra UPDATE directo
+    // sobre Registros_Contactos.
+    function updatePublicByNic(nic, data) {
+      var norm = String(nic || '').trim();
+      return supabaseClient
+        .rpc('actualizar_contacto_publico', {
+          p_nic: norm,
+          p_nombre: data.nombre,
+          p_correo: data.correo,
+          p_telefono: data.telefono
+        })
+        .then(function (res) {
+          if (res.error) throw res.error;
+          if (!res.data) throw new Error('No se encontró un registro con ese NIC para actualizar.');
+          // anon no tiene SELECT: no hay fila real que leer de vuelta.
+          // Si el registro ya estaba en la caché local (poco común para
+          // una sesión pública, pero posible), se refleja el cambio con
+          // los datos que el propio visitante acaba de enviar — sin tocar
+          // NIC, OFICINA ni fecha_hora, igual que hace la función RPC.
+          var idx = -1;
+          for (var i = 0; i < records.length; i++) {
+            if (String(records[i].nic) === norm) { idx = i; break; }
+          }
+          if (idx !== -1) {
+            records[idx] = Object.assign({}, records[idx], {
+              nombre: data.nombre,
+              correo: data.correo,
+              telefono: data.telefono
+            });
+          }
+          return true;
         });
     }
 
@@ -847,8 +890,10 @@
     }
 
     function update(id, data) {
+      // No se reasigna fecha_hora aquí: al editar se conserva la fecha
+      // original del registro (regla 12 del manual maestro). La fecha
+      // nueva solo corresponde a un registro recién creado (ver create()).
       var row = mapDataToRow(data);
-      row.fecha_hora = new Date().toISOString();
       return supabaseClient
         .from(TABLE)
         .update(row)
@@ -889,6 +934,7 @@
       findById: findById,
       existsByNic: existsByNic,
       updateByNic: updateByNic,
+      updatePublicByNic: updatePublicByNic,
       refresh: refresh,
       create: create,
       update: update,
@@ -1343,7 +1389,11 @@
         pendingSaveData = data;
         pendingDuplicateRecord = data.nic;
         pendingConfirmAction = function () {
-          return dataStore.updateByNic(data.nic, data).then(function () {
+          // updatePublicByNic (no updateByNic): el visitante público es
+          // "anon" y no tiene permiso de UPDATE directo; esta función usa
+          // la RPC actualizar_contacto_publico, que solo puede tocar
+          // NOMBRE/CORREO/TELEFONO de esa fila.
+          return dataStore.updatePublicByNic(data.nic, data).then(function () {
             showClienteSuccess();
           });
         };
