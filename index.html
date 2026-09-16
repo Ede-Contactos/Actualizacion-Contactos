@@ -822,20 +822,28 @@
         });
     }
 
-    function create(data) {
+    // options.skipSelect evita encadenar .select() tras el insert. Hace
+    // falta para el formulario público: con la política RLS actual, "anon"
+    // solo puede hacer INSERT (no SELECT), y .select() después de un
+    // insert le pide a PostgREST que lea la fila recién creada para
+    // devolverla — algo que anon no tiene permitido, así que esa lectura
+    // fallaría aunque el insert en sí sea válido. El panel administrativo
+    // (usuario autenticado, con SELECT permitido) sigue llamando a
+    // create(data) sin ese parámetro, tal como antes, para poder editar o
+    // eliminar de inmediato el registro recién creado sin refrescar.
+    function create(data, options) {
+      var skipSelect = !!(options && options.skipSelect);
       var row = mapDataToRow(data);
       row.fecha_hora = new Date().toISOString();
-      return supabaseClient
-        .from(TABLE)
-        .insert([row])
-        .select()
-        .then(function (res) {
-          if (res.error) throw res.error;
-          var savedRow = (res.data && res.data[0]) || row;
-          var rec = mapRowToRecord(savedRow);
-          records.unshift(rec);
-          return rec;
-        });
+      var query = supabaseClient.from(TABLE).insert([row]);
+      if (!skipSelect) query = query.select();
+      return query.then(function (res) {
+        if (res.error) throw res.error;
+        var savedRow = (res.data && res.data[0]) || row;
+        var rec = mapRowToRecord(savedRow);
+        records.unshift(rec);
+        return rec;
+      });
     }
 
     function update(id, data) {
@@ -1343,7 +1351,10 @@
         return;
       }
 
-      return dataStore.create(data).then(function () {
+      // skipSelect: true porque "anon" (el visitante público, sin sesión)
+      // solo tiene permiso de INSERT en Registros_Contactos; no puede leer
+      // de vuelta la fila insertada, así que no se le pide.
+      return dataStore.create(data, { skipSelect: true }).then(function () {
         showClienteSuccess();
       });
     }).catch(handleSupabaseError).then(function () {
