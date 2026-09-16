@@ -1,0 +1,1610 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actualización de Contactos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --ink:#10233F;
+    --text:#17233A;
+    --text-muted:#5C6B84;
+    --navy-900:#082247;
+    --navy-800:#0F1D41;
+    --navy-700:#123A6E;
+    --navy-600:#1B57A6;
+    --navy-100:#E8EEFB;
+    --navy-50:#F4F7FC;
+    --accent-600:#E06A0E;
+    --accent-500:#F08A3C;
+    --accent-100:#FFEEDD;
+    --bg:#F1F4FA;
+    --card:#FFFFFF;
+    --border:#E1E7F0;
+    --success:#1E9E5A;
+    --success-bg:#E8F8EF;
+    --danger:#D8382A;
+    --danger-bg:#FDEAE8;
+    --warn:#C97A12;
+    --warn-bg:#FFF4E0;
+    --radius-lg:18px;
+    --radius-md:12px;
+    --radius-sm:8px;
+    --shadow:0 6px 20px rgba(13,35,80,0.08);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --ink:#EAF0FB;
+      --text:#EAF0FB;
+      --text-muted:#93A2BC;
+      --bg:#0B1220;
+      --card:#141D2E;
+      --border:#243146;
+      --navy-100:#16233F;
+      --navy-50:#101A2E;
+      --accent-100:#2E2013;
+      --success-bg:#0F2A1D;
+      --danger-bg:#331714;
+      --warn-bg:#302307;
+      --shadow:0 6px 20px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --ink:#EAF0FB;
+    --text:#EAF0FB;
+    --text-muted:#93A2BC;
+    --bg:#0B1220;
+    --card:#141D2E;
+    --border:#243146;
+    --navy-100:#16233F;
+    --navy-50:#101A2E;
+    --accent-100:#2E2013;
+    --success-bg:#0F2A1D;
+    --danger-bg:#331714;
+    --warn-bg:#302307;
+    --shadow:0 6px 20px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Manrope',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15.5px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:1180px;margin:0 auto;padding:0 18px calc(56px + env(safe-area-inset-bottom,0px));}
+
+  /* Top accent strip, echoing a commercial-office brand bar */
+  .brand-strip{position:relative;width:100%;height:8px;background:var(--accent-600);}
+  .brand-strip::before{content:'';position:absolute;left:0;top:0;width:100%;height:62%;background:var(--navy-900);}
+
+  
+  /* Barra superior con el logo de Edesur, igual que en la plantilla de referencia */
+  .topbar-main{
+    background:#ffffff;
+    padding:16px 16px;
+    padding-top:calc(16px + env(safe-area-inset-top,0px));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 10px rgba(15,29,65,0.10);
+    border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+    margin-top:18px;
+  }
+  .brand{display:flex;flex-direction:column;gap:2px;max-width:1148px;width:100%;}
+  .brand-row{display:flex;align-items:center;gap:8px;}
+  .logo-img{height:40px;width:auto;display:block;}
+  .brand-caption{font-size:12px;color:var(--text-muted);font-weight:600;letter-spacing:.02em;margin-left:2px;}
+
+  .hero{padding:34px 4px 6px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;}
+  .hero-copy h1{
+    margin:0 0 6px;
+    font-size:clamp(24px,4.2vw,32px);
+    font-weight:800;
+    letter-spacing:-.01em;
+    color:var(--ink);
+  }
+  .hero-copy p{margin:0;color:var(--text-muted);font-size:15px;max-width:60ch;}
+  .stage-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--navy-100);color:var(--navy-700);
+    border-radius:999px;padding:7px 14px;font-weight:700;font-size:12px;
+    white-space:nowrap;letter-spacing:.01em;
+  }
+  :root[data-theme="dark"] .stage-pill{color:#8FB4FF;}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .stage-pill{color:#8FB4FF;} }
+  .stage-pill i{width:7px;height:7px;border-radius:50%;background:var(--accent-600);flex:none;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    padding:24px;
+    margin-top:18px;
+  }
+  .card-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .card-title{
+    margin:0;
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--navy-700);
+  }
+  :root[data-theme="dark"] .card-title{color:#7FA8FF;}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .card-title{color:#7FA8FF;} }
+
+  .edit-banner{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    background:var(--accent-100);color:var(--accent-600);
+    border-radius:var(--radius-md);padding:10px 14px;font-weight:700;font-size:13.5px;
+    margin-bottom:16px;
+  }
+  .edit-banner button{background:none;border:none;color:inherit;font-weight:800;text-decoration:underline;cursor:pointer;padding:0;font-size:13.5px;}
+
+  .field-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+  @media (min-width:640px){ .field-grid.cols-2{grid-template-columns:1fr 1fr;} }
+  @media (min-width:900px){ .field-grid.cols-3{grid-template-columns:1fr 1fr 1fr;} }
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.span-2{grid-column:span 1;}
+  @media (min-width:640px){ .field.span-2{grid-column:span 2;} }
+
+  label{font-size:13px;font-weight:700;color:var(--text-muted);}
+  label .req{color:var(--accent-600);margin-left:2px;}
+  input[type="text"],input[type="email"],input[type="tel"],input[type="date"],select{
+    width:100%;
+    padding:13px 14px;
+    border-radius:var(--radius-md);
+    border:1.5px solid var(--border);
+    background:var(--navy-50);
+    color:var(--text);
+    font-size:15.5px;
+    font-family:inherit;
+    transition:border-color .15s, box-shadow .15s;
+    appearance:none;
+  }
+  select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' stroke='%235C6B84' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;
+  }
+  input:focus,select:focus{
+    outline:none;
+    border-color:var(--navy-600);
+    box-shadow:0 0 0 3px var(--navy-100);
+  }
+  input.invalid,select.invalid{border-color:var(--danger);}
+  .field-error{color:var(--danger);font-size:12.5px;font-weight:600;min-height:1px;}
+
+  .btn-primary{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(135deg,var(--accent-600),var(--accent-500));
+    color:#fff;border:none;border-radius:var(--radius-md);
+    font-weight:800;font-size:15.5px;letter-spacing:.02em;
+    padding:15px 22px;cursor:pointer;width:100%;
+    box-shadow:0 8px 18px rgba(224,106,14,0.30);
+    transition:transform .1s, box-shadow .1s;
+    font-family:inherit;
+  }
+  .btn-primary:active{transform:translateY(1px);box-shadow:0 4px 10px rgba(224,106,14,0.26);}
+  @media (min-width:520px){ .btn-primary{width:auto;} }
+
+  .btn-secondary,.btn-outline,.btn-ghost{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    padding:11px 16px;border-radius:var(--radius-md);
+    font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;
+  }
+  .btn-secondary{background:var(--navy-700);color:#fff;border:none;}
+  .btn-outline{background:transparent;color:var(--navy-700);border:1.5px solid var(--border);}
+  :root[data-theme="dark"] .btn-outline{color:#7FA8FF;border-color:var(--border);}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .btn-outline{color:#7FA8FF;} }
+  .btn-ghost{background:none;border:none;color:var(--text-muted);padding:4px 6px;}
+  .btn-danger-ghost{color:var(--danger);}
+  .btn-icon{width:34px;height:34px;padding:0;border-radius:var(--radius-sm);}
+
+  .form-actions{display:flex;justify-content:flex-end;margin-top:6px;}
+
+  /* Stat tiles */
+  .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px;}
+  @media (min-width:640px){ .stats-grid{grid-template-columns:repeat(4,1fr);} }
+  .stat{
+    background:var(--navy-50);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:14px 14px;
+  }
+  .stat .stat-label{font-size:11.5px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;}
+  .stat .stat-value{font-size:24px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+
+  /* Filters */
+  .filters-row{
+    display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px;
+    background:var(--navy-50);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;
+  }
+  @media (min-width:760px){ .filters-row{grid-template-columns:1.4fr 1fr 1fr auto;align-items:end;} }
+  .filters-row .field{gap:5px;}
+  .filters-row label{font-size:11.5px;}
+  .filters-row input,.filters-row select{padding:10px 12px;font-size:14px;background:var(--card);}
+  .filters-row .btn-outline{height:42px;white-space:nowrap;}
+
+  .table-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .table-toolbar .count-note{font-size:12.5px;color:var(--text-muted);font-weight:600;}
+
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:var(--radius-md);}
+  table{width:100%;border-collapse:collapse;min-width:820px;font-size:13.5px;}
+  thead th{
+    text-align:left;background:var(--navy-700);color:#fff;
+    padding:11px 12px;font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;
+    position:sticky;top:0;
+  }
+  tbody td{padding:11px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+  tbody td.nic-cell{font-weight:800;color:var(--ink);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:var(--navy-50);}
+  .muted-cell{color:var(--text-muted);}
+  .actions-cell{display:flex;gap:6px;white-space:nowrap;}
+  .empty-row td{padding:38px 12px;text-align:center;color:var(--text-muted);font-size:14px;}
+
+  /* Toast */
+  .toast{
+    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));
+    transform:translate(-50%,12px);
+    background:var(--ink);color:var(--bg);
+    padding:13px 20px;border-radius:999px;font-weight:700;font-size:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    display:flex;align-items:center;gap:9px;
+    opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease;
+    z-index:80;max-width:calc(100% - 32px);
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
+  .toast i{width:8px;height:8px;border-radius:50%;background:var(--success);flex:none;}
+  .toast.warn i{background:var(--warn);}
+  .toast.error i{background:var(--danger);}
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(8,17,35,0.55);
+    display:flex;align-items:center;justify-content:center;padding:18px;z-index:90;
+  }
+  .modal{
+    background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);
+    padding:26px;max-width:420px;width:100%;
+  }
+  .modal-icon{
+    width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:var(--warn-bg);color:var(--warn);margin-bottom:14px;
+  }
+  .modal.danger .modal-icon{background:var(--danger-bg);color:var(--danger);}
+  .modal h3{margin:0 0 8px;font-size:18px;font-weight:800;color:var(--ink);}
+  .modal p{margin:0 0 4px;color:var(--text-muted);font-size:14px;line-height:1.55;}
+  .modal .modal-record{
+    margin:14px 0;padding:12px 14px;background:var(--navy-50);border-radius:var(--radius-md);
+    font-size:13.5px;
+  }
+  .modal .modal-record strong{display:block;color:var(--ink);font-size:14.5px;margin-bottom:2px;}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+  .modal-actions button{flex:1 1 auto;}
+
+  .footer{text-align:center;color:var(--text-muted);font-size:11.5px;padding:30px 12px 6px;line-height:1.7;}
+
+  /* Formulario público: campos y botón más grandes, pensados para tocar en el celular */
+  .form-cliente .field{margin-top:16px;}
+  .form-cliente .field:first-child{margin-top:0;}
+  .form-cliente input,.form-cliente select{padding:16px 16px;font-size:16.5px;}
+  .form-cliente .btn-primary{width:100%;padding:18px 22px;font-size:17px;margin-top:22px;}
+
+  .locked-field{background:var(--navy-100);color:var(--text-muted);}
+  .locked-hint{font-size:11.5px;color:var(--text-muted);margin:2px 0 0;}
+
+  /* Oficina Comercial: informativa y no editable, solo desde el QR */
+  .oficina-status{
+    display:flex;align-items:center;gap:10px;
+    border-radius:var(--radius-md);
+    padding:14px 16px;
+    font-size:15px;font-weight:600;
+    line-height:1.4;
+  }
+  .oficina-status svg{flex:none;}
+  .oficina-status.detected{background:var(--navy-100);color:var(--navy-700);}
+  :root[data-theme="dark"] .oficina-status.detected{color:#8FB4FF;}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .oficina-status.detected{color:#8FB4FF;} }
+  .oficina-status.missing{background:var(--warn-bg);color:var(--warn);}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+
+  /* Panel de confirmación tras guardar (vista del cliente) */
+  .success-panel{text-align:center;padding:18px 8px 8px;}
+  .success-panel .success-icon{
+    width:64px;height:64px;border-radius:50%;
+    background:var(--success-bg);color:var(--success);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 18px;
+  }
+  .success-panel h2{margin:0 0 8px;font-size:21px;font-weight:800;color:var(--ink);}
+  .success-panel p{margin:0 0 24px;color:var(--text-muted);font-size:15.5px;}
+
+  @media (max-width:480px){
+    .app{padding-left:14px;padding-right:14px;}
+    .card{padding:18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar-main">
+    <div class="brand">
+      <div class="brand-row">
+        <img class="logo-img" src="data:image/png;base64,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" alt="Edesur Dominicana">
+      </div>
+      <span class="brand-caption">Edesur Dominicana, S.A.</span>
+    </div>
+  </div>
+  <div class="brand-strip"></div>
+
+  <!-- ================= VISTA CLIENTE (pública, vía código QR) ================= -->
+  <div id="vistaCliente">
+    <header class="hero">
+      <div class="hero-copy">
+        <h1>Actualización de Datos de Contacto</h1>
+        <p>Por favor, complete sus datos de contacto para mantener nuestra información actualizada.</p>
+      </div>
+    </header>
+
+    <section class="card" id="clienteFormCard">
+      <form id="clienteForm" class="form-cliente" novalidate>
+        <div class="field">
+          <label for="c-nic">NIC<span class="req">*</span></label>
+          <input type="text" id="c-nic" inputmode="numeric" placeholder="Ej. 4521789" autocomplete="off">
+          <p class="field-error" id="c-err-nic"></p>
+        </div>
+
+        <div class="field">
+          <label for="c-nombre">Nombre completo<span class="req">*</span></label>
+          <input type="text" id="c-nombre" placeholder="Ej. María Fernández Peña" autocomplete="name">
+          <p class="field-error" id="c-err-nombre"></p>
+        </div>
+
+        <div class="field">
+          <label for="c-correo">Correo electrónico</label>
+          <input type="email" id="c-correo" placeholder="correo@ejemplo.com" autocomplete="email">
+          <p class="field-error" id="c-err-correo"></p>
+        </div>
+
+        <div class="field">
+          <label for="c-telefono">Teléfono / Celular</label>
+          <input type="tel" id="c-telefono" placeholder="Ej. 809-555-1234" inputmode="numeric" maxlength="12" autocomplete="tel">
+          <p class="field-error" id="c-err-telefono"></p>
+        </div>
+
+        <div class="field">
+          <div class="oficina-status detected" id="oficinaDetected" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4.4-4-7-7.6-7-11a7 7 0 0 1 14 0c0 3.4-2.6 7-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            <span>Oficina Comercial: <strong id="oficinaDetectedText"></strong></span>
+          </div>
+          <div class="oficina-status missing" id="oficinaMissing" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+            <span>Oficina no identificada. Escanee el código QR de la oficina.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="c-btnGuardar">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+          GUARDAR REGISTRO
+        </button>
+      </form>
+
+      <div class="success-panel" id="clienteSuccess" hidden>
+        <div class="success-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h2>Datos registrados correctamente</h2>
+        <p>Gracias por actualizar su información de contacto.</p>
+        <button type="button" class="btn-outline" id="btnRegistrarOtro">Registrar otro contacto</button>
+      </div>
+    </section>
+
+    <p class="footer">
+      Sus datos se utilizan únicamente para mantener actualizada su información de contacto con nosotros.
+    </p>
+  </div>
+
+  <!-- ================= VISTA ADMINISTRATIVA (uso interno — accesible con ?vista=admin) ================= -->
+  <div id="vistaAdmin" hidden>
+    <header class="hero">
+      <div class="hero-copy">
+        <h1>Consolidado de Actualización de Contactos</h1>
+        <p>Panel interno para revisar y corregir los datos de contacto capturados por los clientes.</p>
+      </div>
+      <span class="stage-pill"><i></i>Vista administrativa · datos en Supabase</span>
+      <button type="button" class="btn-outline" id="btnLogout">Cerrar sesión</button>
+    </header>
+
+    <!-- ============ FORMULARIO INTERNO (registrar/editar manualmente) ============ -->
+    <section class="card" id="formCard">
+      <div class="card-title-row">
+        <h2 class="card-title">Registrar o corregir un contacto</h2>
+      </div>
+
+      <div class="edit-banner" id="editBanner" hidden>
+        <span id="editBannerText">Editando registro</span>
+        <button type="button" id="btnCancelarEdicion">Cancelar edición</button>
+      </div>
+
+      <form id="registroForm" novalidate>
+        <div class="field-grid cols-3">
+          <div class="field">
+            <label for="nic">NIC<span class="req">*</span></label>
+            <input type="text" id="nic" name="nic" placeholder="Ej. 4521789" autocomplete="off">
+            <p class="field-error" id="err-nic"></p>
+          </div>
+          <div class="field span-2">
+            <label for="nombre">Nombre del cliente<span class="req">*</span></label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ej. María Fernández Peña" autocomplete="off">
+            <p class="field-error" id="err-nombre"></p>
+          </div>
+        </div>
+
+        <div class="field-grid cols-2" style="margin-top:14px;">
+          <div class="field">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" name="correo" placeholder="cliente@correo.com" autocomplete="off">
+            <p class="field-error" id="err-correo"></p>
+          </div>
+          <div class="field">
+            <label for="telefono">Teléfono / Celular</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="Ej. 809-555-1234" autocomplete="off" inputmode="numeric" maxlength="12">
+            <p class="field-error" id="err-telefono"></p>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:14px;">
+          <label for="oficina">Oficina</label>
+          <select id="oficina" name="oficina">
+            <option value="">Seleccione una oficina</option>
+          </select>
+          <p class="field-error" id="err-oficina"></p>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" id="btnGuardar">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+            GUARDAR REGISTRO
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ REGISTROS REALIZADOS ============ -->
+    <section class="card" id="registrosCard">
+      <div class="card-title-row">
+        <h2 class="card-title">Registros realizados</h2>
+        <button type="button" class="btn-secondary" id="btnDescargar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          DESCARGAR CONSOLIDADO
+        </button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-label">Total de registros</div><div class="stat-value" id="statTotal">0</div></div>
+        <div class="stat"><div class="stat-label">Registros del día</div><div class="stat-value" id="statHoy">0</div></div>
+        <div class="stat"><div class="stat-label">Correos registrados</div><div class="stat-value" id="statCorreos">0</div></div>
+        <div class="stat"><div class="stat-label">Teléfonos registrados</div><div class="stat-value" id="statTelefonos">0</div></div>
+        <div class="stat"><div class="stat-label">Registros completos</div><div class="stat-value" id="statCompletos">0</div></div>
+      </div>
+
+      <div class="filters-row">
+        <div class="field">
+          <label for="buscar">Buscar por NIC o nombre</label>
+          <input type="text" id="buscar" placeholder="Ej. 4521789 o Fernández">
+        </div>
+        <div class="field">
+          <label for="filtroOficina">Oficina</label>
+          <select id="filtroOficina"><option value="">Todas</option></select>
+        </div>
+        <div class="field">
+          <label for="filtroFecha">Fecha</label>
+          <input type="date" id="filtroFecha">
+        </div>
+        <button type="button" class="btn-outline" id="btnLimpiarFiltros">Limpiar filtros</button>
+      </div>
+
+      <div class="table-toolbar">
+        <span class="count-note" id="countNote">0 registros</span>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>NIC</th>
+              <th>Nombre del cliente</th>
+              <th>Correo</th>
+              <th>Teléfono</th>
+              <th>Oficina</th>
+              <th>Fecha/Hora</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBody">
+            <tr class="empty-row"><td colspan="7">No hay registros aún.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer">
+      Vista interna — no accesible desde el formulario público. Los registros se almacenan de forma centralizada en Supabase.
+    </p>
+  </div>
+
+  <!-- ================= VISTA LOGIN (protege la vista administrativa con Supabase Auth) ================= -->
+  <div id="vistaLogin" hidden>
+    <header class="hero">
+      <div class="hero-copy">
+        <h1>Acceso administrativo</h1>
+        <p>Inicie sesión con su correo y contraseña para consultar y gestionar los registros de contacto.</p>
+      </div>
+    </header>
+
+    <section class="card" id="loginFormCard">
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="login-email">Correo electrónico</label>
+          <input type="email" id="login-email" placeholder="usuario@edesur.com.do" autocomplete="username">
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label for="login-password">Contraseña</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <p class="field-error" id="loginError"></p>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" id="btnLoginSubmit">Iniciar sesión</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>
+
+<!-- ============ MODAL: NIC DUPLICADO ============ -->
+<div class="modal-overlay" id="modalDuplicado" hidden>
+  <div class="modal">
+    <div class="modal-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+    </div>
+    <h3>Este NIC ya tiene un registro.</h3>
+    <p>¿Desea actualizar los datos existentes con la información que acaba de ingresar?</p>
+    <div class="modal-record" id="modalDuplicadoInfo"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-outline" id="btnCancelarDuplicado">Cancelar</button>
+      <button type="button" class="btn-secondary" id="btnActualizarDuplicado">Actualizar registro</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: ELIMINAR REGISTRO ============ -->
+<div class="modal-overlay" id="modalEliminar" hidden>
+  <div class="modal danger">
+    <div class="modal-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+    </div>
+    <h3>Eliminar registro</h3>
+    <p>Esta acción no se puede deshacer.</p>
+    <div class="modal-record" id="modalEliminarInfo"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-outline" id="btnCancelarEliminar">Cancelar</button>
+      <button type="button" class="btn-secondary" id="btnConfirmarEliminar" style="background:var(--danger);">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i></i><span id="toastText"></span></div>
+
+<!-- Cliente oficial de Supabase (vía CDN). Debe cargarse antes del script
+     principal para que window.supabase esté disponible al arrancar. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     CONEXIÓN A SUPABASE
+     Sustituye estos dos valores por los de tu proyecto (Supabase →
+     Project Settings → API). Se utiliza EXCLUSIVAMENTE la clave
+     publicable (anon/public key) — nunca la service_role ni ninguna
+     clave secreta, que jamás debe colocarse en código de cliente.
+     ============================================================ */
+  const SUPABASE_URL = 'https://sdtmbqakgrgdembqcxeo.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_zI-EnMVbfy-ORTnuTDDFMA_PCzb6ow_';
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  /* ============================================================
+     0. PARÁMETROS DE LA URL (QR)
+     El código QR de cada oficina identifica automáticamente la
+     oficina mediante ?oficina=, sin que el cliente tenga que
+     seleccionarla ni escribirla.
+     Ejemplo: pagina.html?oficina=1308%20-%20HERRERA
+     ?vista=admin abre el panel interno (uso exclusivo nuestro).
+     ADVERTENCIA: esto NO es un mecanismo de seguridad real; es solo
+     una forma de acceso provisional. La autenticación real del
+     administrador (Supabase Auth) se implementará en una etapa
+     posterior.
+     ============================================================ */
+  function getQueryParams() {
+    var params = {};
+    try {
+      new URLSearchParams(window.location.search).forEach(function (value, key) {
+        params[key.toLowerCase()] = value;
+      });
+    } catch (e) { /* navegador sin soporte: se ignora, no rompe el formulario */ }
+    return params;
+  }
+  var QP = getQueryParams();
+  var QR_OFICINA = QP.oficina ? QP.oficina.trim() : '';
+  var IS_ADMIN_VIEW = QP.vista === 'admin';
+
+  /* ============================================================
+     1. CONFIGURACIÓN
+     Lista editable de oficinas comerciales, agrupada por zona.
+     Ajustar aquí (agregar, quitar o renombrar zonas/oficinas)
+     cuando cambie la estructura de oficinas de la empresa.
+     ============================================================ */
+  var OFICINAS_POR_ZONA = [
+    {
+      zona: 'Zona Distrito',
+      oficinas: [
+        '1101 - LA FERIA', '1117 - NACO', '1120 - R. BETANCOURT', '1105 - ARROYO HONDO',
+        '1204 - GALERIA 360', '1205 - PATIO COLOMBIA', '1223 - LA YUCA',
+        '1903 - GS CRISTO REY', '1985 - PE GIRASOLES'
+      ]
+    },
+    {
+      zona: 'Zona Santo Domingo',
+      oficinas: [
+        '1308 - HERRERA', '1127 - OCCIDENTAL MALL', '1980 - ALCARRIZO NORTE',
+        '1221 - LOS ALCARRIZOS', '1984 - PANTOJA', '1982 - PEDRO BRAND',
+        '1910 - ALCARRIZOS SUR', '1202 - P PLAZA LUPERON', '1981 - PE BUENOS AIRES'
+      ]
+    },
+    {
+      zona: 'Zona San Cristóbal',
+      oficinas: [
+        '1214 - VILLA ALT.', '1312 - HAINA', '1318 - SAN CRISTOBAL', '1328 - LAVAPIES SC',
+        '1380 - YAGUATE', '1381 - SAB GDE DE PAL', '1382 - CAMBITA GARABIT',
+        '1383 - NIGUA DE HAINA', '1384 - HATILLO D HAINA', '1385 - EL CARRIL D HAI',
+        '1386 - EL PUERTO', '1389 - PP.EE MADRE VIE', '1912 - QUITA SUEÑO'
+      ]
+    },
+    {
+      zona: 'Zona Baní',
+      oficinas: [
+        '1570 - BANI', '1576 - S.JOSE DE OCOA', '1571 - AZUA', '1533 - RANCHO ARRIBA',
+        '1581 - NIZAO', '1582 - MATANZA', '1583 - PADRE LAS CASAS', '1584 - LAS CHARCAS',
+        '1585 - SABANA YEGUA', '1921 - LA BOMBITA AZUA'
+      ]
+    },
+    {
+      zona: 'Zona San Juan',
+      oficinas: [
+        '1473 - SAN JUAN', '1478 - LAS MATAS', '1479 - ELIAS PINA', '1481 - EL CERCADO',
+        '1482 - BOHECHIO', '1483 - JUAN DE HERRERA', '1484 - PEDRO CORTO',
+        '1486 - VALLEJUELO', '1488 - P MIRADOR NORTE', '1931 - LOS CORBANOS'
+      ]
+    },
+    {
+      zona: 'Zona Barahona',
+      oficinas: [
+        '1672 - BARAHONA', '1675 - PEDERNALES', '1674 - DUVERGE', '1677 - NEYBA',
+        '1681 - CABRAL', '1682 - TAMAYO', '1683 - ENRIQUILLO', '1684 - VICENTE NOBLE',
+        '1685 - JIMANI', '1687 - PARAISO', '1688 - GALVAN', '1941 - MARIA MONTES'
+      ]
+    }
+  ];
+
+  // La vista se decide en el arranque (sección 0) según ?vista=admin en la URL:
+  // "cliente" (pública, por defecto) o "admin" (uso interno).
+
+  /* ============================================================
+     2. CAPA DE DATOS (registros)
+     Abstracción de almacenamiento que habla con la tabla
+     "Registros_Contactos" de Supabase mediante la clave publicable.
+     Mantiene además una caché local en memoria (records) que refleja
+     lo último leído/guardado en la base de datos: getAll/findById
+     siguen siendo síncronas y trabajan sobre esa caché (la usan la
+     tabla, los filtros, los indicadores y el CSV), mientras que
+     refresh/existsByNic/updateByNic/create/update/remove son asíncronas
+     porque consultan Supabase directamente. El resto de la aplicación
+     (formulario, validaciones, tabla, exportación) no necesitó
+     cambiar más allá de esperar (then) estas promesas.
+     ============================================================ */
+  var dataStore = (function () {
+    var TABLE = 'Registros_Contactos';
+    var records = []; // caché local: espejo de lo cargado/guardado en Supabase
+
+    function mapRowToRecord(row) {
+      return {
+        id: row.id,
+        nic: row.NIC,
+        nombre: row.NOMBRE,
+        correo: row.CORREO,
+        telefono: row.TELEFONO,
+        oficina: row.OFICINA,
+        fechaHora: row.fecha_hora ? new Date(row.fecha_hora) : new Date()
+      };
+    }
+    function mapDataToRow(data) {
+      return {
+        NIC: data.nic,
+        NOMBRE: data.nombre,
+        CORREO: data.correo,
+        TELEFONO: data.telefono,
+        OFICINA: data.oficina
+      };
+    }
+
+    function getAll() {
+      return records.slice();
+    }
+    function findById(id) {
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].id === id) return records[i];
+      }
+      return null;
+    }
+
+    // Comprueba si el NIC ya existe en Supabase SIN exponer los datos del
+    // cliente que lo tiene registrado (nombre, correo, teléfono, oficina).
+    // Llama a la función RPC nic_existe(p_nic, p_excluir_id), que corre en
+    // el servidor con SECURITY DEFINER y solo responde true/false — así
+    // la detección de duplicados funciona igual aunque no exista (o no se
+    // quiera dar) una política RLS de SELECT abierta sobre la tabla.
+    // excludeId se usa solo al editar en el panel administrativo, para no
+    // marcar como "duplicado" el propio registro que se está editando si
+    // no cambió su NIC (ver SQL de la función más abajo).
+    function existsByNic(nic, excludeId) {
+      var norm = String(nic || '').trim();
+      if (!norm) return Promise.resolve(false);
+      return supabaseClient
+        .rpc('nic_existe', { p_nic: norm, p_excluir_id: excludeId != null ? excludeId : null })
+        .then(function (res) {
+          if (res.error) throw res.error;
+          return !!res.data;
+        });
+    }
+
+    // Actualiza por NIC (no por id) el registro existente cuando se
+    // confirma "Actualizar registro" tras detectar un duplicado. Se usa
+    // el NIC como clave porque existsByNic ya no revela el id del
+    // registro previo (eso es justamente lo que evita exponer datos de
+    // otros clientes antes de tiempo).
+    function updateByNic(nic, data) {
+      var norm = String(nic || '').trim();
+      var row = mapDataToRow(data);
+      row.fecha_hora = new Date().toISOString();
+      return supabaseClient
+        .from(TABLE)
+        .update(row)
+        .eq('NIC', norm)
+        .select()
+        .then(function (res) {
+          if (res.error) throw res.error;
+          var savedRow = (res.data && res.data[0]) || Object.assign({ NIC: norm }, row);
+          var rec = mapRowToRecord(savedRow);
+          var idx = -1;
+          for (var i = 0; i < records.length; i++) {
+            if (String(records[i].nic) === norm) { idx = i; break; }
+          }
+          if (idx !== -1) records[idx] = rec; else records.unshift(rec);
+          return rec;
+        });
+    }
+
+    // Carga (o recarga) todos los registros desde Supabase hacia la
+    // caché local. La usa la vista administrativa al abrirse.
+    function refresh() {
+      return supabaseClient
+        .from(TABLE)
+        .select('*')
+        .order('fecha_hora', { ascending: false })
+        .then(function (res) {
+          if (res.error) throw res.error;
+          records = (res.data || []).map(mapRowToRecord);
+          return records.slice();
+        });
+    }
+
+    function create(data) {
+      var row = mapDataToRow(data);
+      row.fecha_hora = new Date().toISOString();
+      return supabaseClient
+        .from(TABLE)
+        .insert([row])
+        .select()
+        .then(function (res) {
+          if (res.error) throw res.error;
+          var savedRow = (res.data && res.data[0]) || row;
+          var rec = mapRowToRecord(savedRow);
+          records.unshift(rec);
+          return rec;
+        });
+    }
+
+    function update(id, data) {
+      var row = mapDataToRow(data);
+      row.fecha_hora = new Date().toISOString();
+      return supabaseClient
+        .from(TABLE)
+        .update(row)
+        .eq('id', id)
+        .select()
+        .then(function (res) {
+          if (res.error) throw res.error;
+          var savedRow = (res.data && res.data[0]) || Object.assign({ id: id }, row);
+          var rec = mapRowToRecord(savedRow);
+          var idx = -1;
+          for (var i = 0; i < records.length; i++) { if (records[i].id === id) { idx = i; break; } }
+          if (idx !== -1) records[idx] = rec; else records.unshift(rec);
+          return rec;
+        });
+    }
+
+    function remove(id) {
+      return supabaseClient
+        .from(TABLE)
+        .delete()
+        .eq('id', id)
+        .then(function (res) {
+          if (res.error) throw res.error;
+          records = records.filter(function (r) { return r.id !== id; });
+          return true;
+        });
+    }
+
+    // Vacía la caché local (sin tocar Supabase). Se usa al cerrar sesión
+    // en la vista administrativa, para que ningún registro quede visible
+    // en pantalla ni consultable mientras no haya una sesión válida.
+    function clear() {
+      records = [];
+    }
+
+    return {
+      getAll: getAll,
+      findById: findById,
+      existsByNic: existsByNic,
+      updateByNic: updateByNic,
+      refresh: refresh,
+      create: create,
+      update: update,
+      remove: remove,
+      clear: clear
+    };
+  })();
+
+  /* ============================================================
+     3. VALIDACIONES
+     ============================================================ */
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  // El campo de teléfono se autoformatea a XXX-XXX-XXXX (10 dígitos, ver formatPhoneMask).
+  function isPhoneValid(value) {
+    if (!value) return true;
+    var digits = value.replace(/\D/g, '');
+    return digits.length === 10;
+  }
+  function isEmailValid(value) {
+    if (!value) return true;
+    return EMAIL_RE.test(value);
+  }
+
+  // Aplica el formato XXX-XXX-XXXX mientras se escribe el teléfono.
+  function formatPhoneMask(value) {
+    var digits = value.replace(/\D/g, '').slice(0, 10);
+    if (digits.length > 6) return digits.slice(0, 3) + '-' + digits.slice(3, 6) + '-' + digits.slice(6);
+    if (digits.length > 3) return digits.slice(0, 3) + '-' + digits.slice(3);
+    return digits;
+  }
+
+  function validateForm(data) {
+    var errors = {};
+    if (!data.nic) errors.nic = 'El NIC es obligatorio.';
+    if (!data.nombre) errors.nombre = 'El nombre del cliente es obligatorio.';
+    if (data.correo && !isEmailValid(data.correo)) errors.correo = 'Ingrese un correo electrónico válido.';
+    if (data.telefono && !isPhoneValid(data.telefono)) errors.telefono = 'Ingrese un teléfono válido de 10 dígitos.';
+    return errors;
+  }
+
+  function isRecordCompleto(rec) {
+    return !!(rec.nic && rec.nombre && rec.correo && rec.telefono && rec.oficina);
+  }
+
+  /* ============================================================
+     4. UTILIDADES DE FORMATO
+     ============================================================ */
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function formatFechaHora(date) {
+    return pad2(date.getDate()) + '/' + pad2(date.getMonth() + 1) + '/' + date.getFullYear() +
+      ' ' + pad2(date.getHours()) + ':' + pad2(date.getMinutes());
+  }
+  function formatFechaISO(date) {
+    return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+  }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ============================================================
+     5. REFERENCIAS DOM
+     ============================================================ */
+  var form = document.getElementById('registroForm');
+  var inputNic = document.getElementById('nic');
+  var inputNombre = document.getElementById('nombre');
+  var inputCorreo = document.getElementById('correo');
+  var inputTelefono = document.getElementById('telefono');
+  var selectOficina = document.getElementById('oficina');
+  var btnGuardar = document.getElementById('btnGuardar');
+
+  var editBanner = document.getElementById('editBanner');
+  var editBannerText = document.getElementById('editBannerText');
+  var btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
+
+  var buscarInput = document.getElementById('buscar');
+  var filtroOficina = document.getElementById('filtroOficina');
+  var filtroFecha = document.getElementById('filtroFecha');
+  var btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
+
+  var tablaBody = document.getElementById('tablaBody');
+  var countNote = document.getElementById('countNote');
+
+  var statTotal = document.getElementById('statTotal');
+  var statCorreos = document.getElementById('statCorreos');
+  var statTelefonos = document.getElementById('statTelefonos');
+  var statCompletos = document.getElementById('statCompletos');
+
+  var btnDescargar = document.getElementById('btnDescargar');
+
+  var modalDuplicado = document.getElementById('modalDuplicado');
+  var modalDuplicadoInfo = document.getElementById('modalDuplicadoInfo');
+  var btnCancelarDuplicado = document.getElementById('btnCancelarDuplicado');
+  var btnActualizarDuplicado = document.getElementById('btnActualizarDuplicado');
+
+  var modalEliminar = document.getElementById('modalEliminar');
+  var modalEliminarInfo = document.getElementById('modalEliminarInfo');
+  var btnCancelarEliminar = document.getElementById('btnCancelarEliminar');
+  var btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
+
+  var toast = document.getElementById('toast');
+  var toastText = document.getElementById('toastText');
+
+  var statHoy = document.getElementById('statHoy');
+
+  // --- Vista cliente (formulario público) ---
+  var vistaCliente = document.getElementById('vistaCliente');
+  var vistaAdmin = document.getElementById('vistaAdmin');
+  var clienteForm = document.getElementById('clienteForm');
+  var clienteSuccess = document.getElementById('clienteSuccess');
+  var inputCNic = document.getElementById('c-nic');
+  var inputCNombre = document.getElementById('c-nombre');
+  var inputCCorreo = document.getElementById('c-correo');
+  var inputCTelefono = document.getElementById('c-telefono');
+  var btnCGuardar = document.getElementById('c-btnGuardar');
+  var oficinaDetected = document.getElementById('oficinaDetected');
+  var oficinaDetectedText = document.getElementById('oficinaDetectedText');
+  var oficinaMissing = document.getElementById('oficinaMissing');
+  var btnRegistrarOtro = document.getElementById('btnRegistrarOtro');
+
+  // --- Vista login (protege la vista administrativa con Supabase Auth) ---
+  var vistaLogin = document.getElementById('vistaLogin');
+  var loginForm = document.getElementById('loginForm');
+  var inputLoginEmail = document.getElementById('login-email');
+  var inputLoginPassword = document.getElementById('login-password');
+  var loginError = document.getElementById('loginError');
+  var btnLoginSubmit = document.getElementById('btnLoginSubmit');
+  var btnLogout = document.getElementById('btnLogout');
+
+  function attachPhoneMask(input) {
+    input.addEventListener('input', function () {
+      var start = this.selectionStart;
+      var lenBefore = this.value.length;
+      this.value = formatPhoneMask(this.value);
+      var lenAfter = this.value.length;
+      var pos = Math.max(0, start + (lenAfter - lenBefore));
+      this.setSelectionRange(pos, pos);
+    });
+  }
+  attachPhoneMask(inputTelefono);
+  attachPhoneMask(inputCTelefono);
+
+  var editingId = null;
+  var pendingSaveData = null;
+  var pendingDuplicateRecord = null;
+  var pendingConfirmAction = null;
+  var pendingDeleteId = null;
+  var toastTimer = null;
+
+  /* ============================================================
+     6. INICIALIZACIÓN DE SELECTS DE OFICINA
+     ============================================================ */
+  function populateOficinas() {
+    // Estos selects son exclusivos de la vista administrativa (registrar/corregir
+    // y filtrar internamente). La vista del cliente ya NO tiene select de oficina:
+    // la oficina llega únicamente por el parámetro ?oficina= de la URL (ver sección 0).
+    OFICINAS_POR_ZONA.forEach(function (grupo) {
+      var groupForm = document.createElement('optgroup');
+      groupForm.label = grupo.zona;
+      var groupFiltro = document.createElement('optgroup');
+      groupFiltro.label = grupo.zona;
+
+      grupo.oficinas.forEach(function (nombre) {
+        var opt1 = document.createElement('option');
+        opt1.value = nombre; opt1.textContent = nombre;
+        groupForm.appendChild(opt1);
+
+        var opt2 = document.createElement('option');
+        opt2.value = nombre; opt2.textContent = nombre;
+        groupFiltro.appendChild(opt2);
+      });
+
+      selectOficina.appendChild(groupForm);
+      filtroOficina.appendChild(groupFiltro);
+    });
+  }
+
+  /* ============================================================
+     7. TOAST DE CONFIRMACIÓN
+     ============================================================ */
+  function showToast(message, type) {
+    toastText.textContent = message;
+    toast.className = 'toast show' + (type ? ' ' + type : '');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.className = 'toast'; }, 3200);
+  }
+
+  // Manejador común de errores de Supabase (red, RLS, etc.) para las
+  // operaciones de guardar/editar/eliminar/cargar. No detiene la app:
+  // solo informa que la operación no se completó, para que se reintente.
+  function handleSupabaseError(err) {
+    console.error('Error de Supabase:', err);
+    showToast('No se pudo completar la operación. Intente nuevamente.', 'error');
+  }
+
+  /* ============================================================
+     8. VALIDACIÓN EN PANTALLA
+     ============================================================ */
+  var fieldInputs = { nic: inputNic, nombre: inputNombre, correo: inputCorreo, telefono: inputTelefono };
+  function clearFieldErrors() {
+    ['nic', 'nombre', 'correo', 'telefono'].forEach(function (key) {
+      document.getElementById('err-' + key).textContent = '';
+      fieldInputs[key].classList.remove('invalid');
+    });
+  }
+  function showFieldErrors(errors) {
+    Object.keys(errors).forEach(function (key) {
+      var el = document.getElementById('err-' + key);
+      if (el) el.textContent = errors[key];
+      if (fieldInputs[key]) fieldInputs[key].classList.add('invalid');
+    });
+  }
+
+  /* ============================================================
+     9. LECTURA / ESCRITURA DEL FORMULARIO
+     ============================================================ */
+  function readFormData() {
+    return {
+      nic: inputNic.value.trim(),
+      nombre: inputNombre.value.trim(),
+      correo: inputCorreo.value.trim(),
+      telefono: inputTelefono.value.trim(),
+      oficina: selectOficina.value
+    };
+  }
+
+  function resetForm() {
+    form.reset();
+    clearFieldErrors();
+    editingId = null;
+    editBanner.hidden = true;
+  }
+
+  function loadRecordIntoForm(rec) {
+    inputNic.value = rec.nic;
+    inputNombre.value = rec.nombre;
+    inputCorreo.value = rec.correo;
+    inputTelefono.value = rec.telefono;
+    selectOficina.value = rec.oficina;
+    clearFieldErrors();
+    editingId = rec.id;
+    editBannerText.textContent = 'Editando registro — NIC ' + rec.nic;
+    editBanner.hidden = false;
+    formCardScrollIntoView();
+    inputNombre.focus();
+  }
+
+  function formCardScrollIntoView() {
+    document.getElementById('formCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function finishSave(message) {
+    resetForm();
+    render();
+    showToast(message, 'success');
+    inputNic.focus();
+  }
+
+  /* ============================================================
+     10. ENVÍO DEL FORMULARIO (GUARDAR REGISTRO)
+     ============================================================ */
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearFieldErrors();
+
+    var data = readFormData();
+    var errors = validateForm(data);
+    if (Object.keys(errors).length) {
+      showFieldErrors(errors);
+      return;
+    }
+
+    btnGuardar.disabled = true;
+    dataStore.existsByNic(data.nic, editingId).then(function (conflicting) {
+      if (editingId !== null) {
+        if (conflicting) {
+          pendingSaveData = data;
+          pendingDuplicateRecord = data.nic;
+          pendingConfirmAction = function () {
+            return dataStore.updateByNic(data.nic, data).then(function () {
+              finishSave('Registro actualizado correctamente.');
+            });
+          };
+          openDuplicadoModal(data.nic);
+          return;
+        }
+        return dataStore.update(editingId, data).then(function () {
+          finishSave('Registro actualizado correctamente.');
+        });
+      }
+
+      if (conflicting) {
+        pendingSaveData = data;
+        pendingDuplicateRecord = data.nic;
+        pendingConfirmAction = function () {
+          return dataStore.updateByNic(data.nic, data).then(function () {
+            finishSave('Registro actualizado correctamente.');
+          });
+        };
+        openDuplicadoModal(data.nic);
+        return;
+      }
+
+      return dataStore.create(data).then(function () {
+        finishSave('Registro guardado correctamente.');
+      });
+    }).catch(handleSupabaseError).then(function () {
+      btnGuardar.disabled = false;
+    });
+  });
+
+  btnCancelarEdicion.addEventListener('click', function () {
+    resetForm();
+  });
+
+  /* ============================================================
+     11. MODAL — NIC DUPLICADO
+     ============================================================ */
+  // Solo recibe el NIC (nunca los datos del cliente que ya lo tiene
+  // registrado): la comprobación de duplicados usa una función RPC que
+  // responde exclusivamente sí/no, así que aquí no hay nombre, correo,
+  // teléfono ni oficina de terceros que se puedan mostrar por error.
+  function openDuplicadoModal(nic) {
+    modalDuplicadoInfo.innerHTML =
+      '<strong>NIC ' + escapeHtml(nic) + '</strong>Ya existe un registro con este NIC.';
+    modalDuplicado.hidden = false;
+  }
+  function closeDuplicadoModal() {
+    modalDuplicado.hidden = true;
+    pendingSaveData = null;
+    pendingDuplicateRecord = null;
+    pendingConfirmAction = null;
+  }
+  btnCancelarDuplicado.addEventListener('click', closeDuplicadoModal);
+  btnActualizarDuplicado.addEventListener('click', function () {
+    if (!pendingConfirmAction) return;
+    var action = pendingConfirmAction;
+    modalDuplicado.hidden = true;
+    pendingSaveData = null;
+    pendingDuplicateRecord = null;
+    pendingConfirmAction = null;
+    Promise.resolve(action()).catch(handleSupabaseError);
+  });
+
+  /* ============================================================
+     12. ACCIONES DE TABLA — EDITAR / ELIMINAR
+     ============================================================ */
+  function openEliminarModal(rec) {
+    pendingDeleteId = rec.id;
+    modalEliminarInfo.innerHTML =
+      '<strong>' + escapeHtml(rec.nombre) + '</strong>NIC ' + escapeHtml(rec.nic) +
+      ' · ' + escapeHtml(rec.oficina || 'Sin oficina');
+    modalEliminar.hidden = false;
+  }
+  function closeEliminarModal() {
+    modalEliminar.hidden = true;
+    pendingDeleteId = null;
+  }
+  btnCancelarEliminar.addEventListener('click', closeEliminarModal);
+  btnConfirmarEliminar.addEventListener('click', function () {
+    if (pendingDeleteId === null) return;
+    var id = pendingDeleteId;
+    btnConfirmarEliminar.disabled = true;
+    dataStore.remove(id).then(function () {
+      if (editingId === id) resetForm();
+      closeEliminarModal();
+      render();
+      showToast('Registro eliminado.', 'warn');
+    }).catch(handleSupabaseError).then(function () {
+      btnConfirmarEliminar.disabled = false;
+    });
+  });
+
+  tablaBody.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var id = Number(btn.getAttribute('data-id'));
+    var rec = dataStore.findById(id);
+    if (!rec) return;
+    if (btn.getAttribute('data-action') === 'editar') loadRecordIntoForm(rec);
+    if (btn.getAttribute('data-action') === 'eliminar') openEliminarModal(rec);
+  });
+
+  /* ============================================================
+     12B. FORMULARIO PÚBLICO (VISTA CLIENTE)
+     Comparte dataStore/validaciones con la vista interna, pero
+     tiene su propia UI: no expone tabla ni estadísticas, y al
+     guardar muestra una pantalla de confirmación en vez de un
+     toast, pensada para que el cliente la vea claramente.
+     ============================================================ */
+  var clienteFieldInputs = { nic: inputCNic, nombre: inputCNombre, correo: inputCCorreo, telefono: inputCTelefono };
+  function clearClienteFieldErrors() {
+    ['nic', 'nombre', 'correo', 'telefono'].forEach(function (key) {
+      document.getElementById('c-err-' + key).textContent = '';
+      clienteFieldInputs[key].classList.remove('invalid');
+    });
+  }
+  function showClienteFieldErrors(errors) {
+    Object.keys(errors).forEach(function (key) {
+      var el = document.getElementById('c-err-' + key);
+      if (el) el.textContent = errors[key];
+      if (clienteFieldInputs[key]) clienteFieldInputs[key].classList.add('invalid');
+    });
+  }
+  function readClienteFormData() {
+    return {
+      nic: inputCNic.value.trim(),
+      nombre: inputCNombre.value.trim(),
+      correo: inputCCorreo.value.trim(),
+      telefono: inputCTelefono.value.trim(),
+      oficina: QR_OFICINA // la oficina proviene EXCLUSIVAMENTE del parámetro ?oficina= de la URL
+    };
+  }
+  // Solo limpia los datos propios de cada visita; la oficina identificada
+  // por el QR no se toca (es fija para todo el puesto/dispositivo).
+  function resetClienteForm() {
+    inputCNic.value = '';
+    inputCNombre.value = '';
+    inputCCorreo.value = '';
+    inputCTelefono.value = '';
+    clearClienteFieldErrors();
+  }
+  function showClienteSuccess() {
+    clienteForm.hidden = true;
+    clienteSuccess.hidden = false;
+    render(); // mantiene al día la vista administrativa aunque esté oculta
+  }
+
+  clienteForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearClienteFieldErrors();
+
+    // Sin oficina identificada por el QR no se permite guardar bajo ninguna
+    // circunstancia (segunda barrera, además de que el botón queda deshabilitado).
+    if (!QR_OFICINA) {
+      oficinaMissing.hidden = false;
+      return;
+    }
+
+    var data = readClienteFormData();
+    var errors = validateForm(data);
+    if (Object.keys(errors).length) {
+      showClienteFieldErrors(errors);
+      return;
+    }
+
+    btnCGuardar.disabled = true;
+    dataStore.existsByNic(data.nic).then(function (existing) {
+      if (existing) {
+        pendingSaveData = data;
+        pendingDuplicateRecord = data.nic;
+        pendingConfirmAction = function () {
+          return dataStore.updateByNic(data.nic, data).then(function () {
+            showClienteSuccess();
+          });
+        };
+        openDuplicadoModal(data.nic);
+        return;
+      }
+
+      return dataStore.create(data).then(function () {
+        showClienteSuccess();
+      });
+    }).catch(handleSupabaseError).then(function () {
+      btnCGuardar.disabled = false;
+    });
+  });
+
+  btnRegistrarOtro.addEventListener('click', function () {
+    clienteSuccess.hidden = true;
+    clienteForm.hidden = false;
+    resetClienteForm();
+    inputCNic.focus();
+  });
+
+  /* ============================================================
+     13. FILTROS
+     ============================================================ */
+  function getFilteredRecords() {
+    var texto = buscarInput.value.trim().toLowerCase();
+    var oficina = filtroOficina.value;
+    var fecha = filtroFecha.value;
+
+    return dataStore.getAll()
+      .filter(function (r) {
+        if (texto) {
+          var match = r.nic.toLowerCase().indexOf(texto) !== -1 || r.nombre.toLowerCase().indexOf(texto) !== -1;
+          if (!match) return false;
+        }
+        if (oficina && r.oficina !== oficina) return false;
+        if (fecha && formatFechaISO(r.fechaHora) !== fecha) return false;
+        return true;
+      })
+      .sort(function (a, b) { return b.fechaHora - a.fechaHora; });
+  }
+
+  [buscarInput, filtroOficina, filtroFecha].forEach(function (el) {
+    el.addEventListener('input', renderTabla);
+    el.addEventListener('change', renderTabla);
+  });
+  btnLimpiarFiltros.addEventListener('click', function () {
+    buscarInput.value = '';
+    filtroOficina.value = '';
+    filtroFecha.value = '';
+    renderTabla();
+  });
+
+  /* ============================================================
+     14. RENDER — TABLA, INDICADORES
+     ============================================================ */
+  function renderStats() {
+    var all = dataStore.getAll();
+    var hoy = formatFechaISO(new Date());
+    statTotal.textContent = all.length;
+    statHoy.textContent = all.filter(function (r) { return formatFechaISO(r.fechaHora) === hoy; }).length;
+    statCorreos.textContent = all.filter(function (r) { return !!r.correo; }).length;
+    statTelefonos.textContent = all.filter(function (r) { return !!r.telefono; }).length;
+    statCompletos.textContent = all.filter(isRecordCompleto).length;
+  }
+
+  function renderTabla() {
+    var rows = getFilteredRecords();
+    var total = dataStore.getAll().length;
+
+    if (rows.length === 0) {
+      tablaBody.innerHTML = '<tr class="empty-row"><td colspan="7">' +
+        (total === 0 ? 'No hay registros aún. Complete el formulario para agregar el primero.' : 'Ningún registro coincide con los filtros aplicados.') +
+        '</td></tr>';
+    } else {
+      tablaBody.innerHTML = rows.map(function (r) {
+        return '<tr>' +
+          '<td class="nic-cell">' + escapeHtml(r.nic) + '</td>' +
+          '<td>' + escapeHtml(r.nombre) + '</td>' +
+          '<td class="' + (r.correo ? '' : 'muted-cell') + '">' + (escapeHtml(r.correo) || 'Sin correo') + '</td>' +
+          '<td class="' + (r.telefono ? '' : 'muted-cell') + '">' + (escapeHtml(r.telefono) || 'Sin teléfono') + '</td>' +
+          '<td class="' + (r.oficina ? '' : 'muted-cell') + '">' + (escapeHtml(r.oficina) || 'Sin oficina') + '</td>' +
+          '<td>' + formatFechaHora(r.fechaHora) + '</td>' +
+          '<td><div class="actions-cell">' +
+            '<button type="button" class="btn-ghost btn-icon" data-action="editar" data-id="' + r.id + '" title="Editar" aria-label="Editar registro de ' + escapeHtml(r.nombre) + '">' +
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>' +
+            '</button>' +
+            '<button type="button" class="btn-ghost btn-icon btn-danger-ghost" data-action="eliminar" data-id="' + r.id + '" title="Eliminar" aria-label="Eliminar registro de ' + escapeHtml(r.nombre) + '">' +
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>' +
+            '</button>' +
+          '</div></td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    var filtered = rows.length;
+    countNote.textContent = (filtered === total)
+      ? (total + (total === 1 ? ' registro' : ' registros'))
+      : (filtered + ' de ' + total + ' registros');
+  }
+
+  function render() {
+    renderStats();
+    renderTabla();
+  }
+
+  /* ============================================================
+     15. EXPORTACIÓN — DESCARGAR CONSOLIDADO (CSV)
+     ============================================================ */
+  function csvEscape(value) {
+    var s = String(value == null ? '' : value);
+    if (/[",\n;]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function buildCSV(records) {
+    var header = ['NIC', 'Nombre del Cliente', 'Correo', 'Teléfono', 'Oficina', 'Fecha/Hora'];
+    var lines = [header.map(csvEscape).join(',')];
+    records
+      .slice()
+      .sort(function (a, b) { return b.fechaHora - a.fechaHora; })
+      .forEach(function (r) {
+        lines.push([
+          r.nic, r.nombre, r.correo, r.telefono, r.oficina, formatFechaHora(r.fechaHora)
+        ].map(csvEscape).join(','));
+      });
+    return '﻿' + lines.join('\r\n');
+  }
+
+  function buildDownloadFilename() {
+    var now = new Date();
+    return 'consolidado_contactos_' + now.getFullYear() + pad2(now.getMonth() + 1) + pad2(now.getDate()) +
+      '_' + pad2(now.getHours()) + pad2(now.getMinutes()) + '.csv';
+  }
+
+  btnDescargar.addEventListener('click', function () {
+    var records = dataStore.getAll();
+    if (records.length === 0) {
+      showToast('No hay registros para descargar.', 'warn');
+      return;
+    }
+    var csv = buildCSV(records);
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var filename = buildDownloadFilename();
+
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+
+    showToast('Consolidado descargado correctamente.', 'success');
+  });
+
+  /* ============================================================
+     15B. AUTENTICACIÓN (SUPABASE AUTH) — SOLO VISTA ADMINISTRATIVA
+     La vista pública del cliente nunca requiere sesión iniciada.
+     La vista administrativa (?vista=admin) exige haber iniciado
+     sesión con supabase.auth.signInWithPassword(); mientras no haya
+     una sesión válida no se muestra el panel ni se consulta
+     Registros_Contactos (dataStore.refresh() solo se llama tras
+     confirmar la sesión, ver mostrarAdminAutenticado más abajo).
+     IMPORTANTE: este login es la puerta de entrada de la interfaz,
+     no reemplaza la seguridad real, que deben darla las políticas
+     RLS de Supabase exigiendo auth.role() = 'authenticated' para
+     SELECT/UPDATE/DELETE sobre Registros_Contactos.
+     ============================================================ */
+  function mostrarAdminAutenticado() {
+    vistaLogin.hidden = true;
+    vistaAdmin.hidden = false;
+    loginError.textContent = '';
+    dataStore.refresh().then(function () {
+      render();
+    }).catch(function (err) {
+      handleSupabaseError(err);
+      render();
+    });
+  }
+
+  function mostrarLogin() {
+    vistaAdmin.hidden = true;
+    vistaLogin.hidden = false;
+    dataStore.clear();
+    render();
+  }
+
+  function initAdminAuth() {
+    loginForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      loginError.textContent = '';
+      var email = inputLoginEmail.value.trim();
+      var password = inputLoginPassword.value;
+      if (!email || !password) {
+        loginError.textContent = 'Ingrese su correo y contraseña.';
+        return;
+      }
+      btnLoginSubmit.disabled = true;
+      supabaseClient.auth.signInWithPassword({ email: email, password: password })
+        .then(function (res) {
+          if (res.error) {
+            loginError.textContent = 'Correo o contraseña incorrectos.';
+            return;
+          }
+          inputLoginPassword.value = '';
+          // onAuthStateChange (registrado abajo) se encarga de mostrar el panel.
+        })
+        .catch(function () {
+          loginError.textContent = 'No se pudo iniciar sesión. Intente nuevamente.';
+        })
+        .then(function () {
+          btnLoginSubmit.disabled = false;
+        });
+    });
+
+    btnLogout.addEventListener('click', function () {
+      btnLogout.disabled = true;
+      supabaseClient.auth.signOut().catch(handleSupabaseError).then(function () {
+        btnLogout.disabled = false;
+      });
+      // onAuthStateChange se encarga de volver a mostrar el formulario de login.
+    });
+
+    // Fuente única de verdad del estado de sesión: se dispara de inmediato
+    // con la sesión actual (por ejemplo, si el navegador ya tenía una
+    // sesión iniciada) y cada vez que cambia (login, logout, expiración).
+    supabaseClient.auth.onAuthStateChange(function (event, session) {
+      if (session) {
+        mostrarAdminAutenticado();
+      } else {
+        mostrarLogin();
+      }
+    });
+  }
+
+  /* ============================================================
+     16. ARRANQUE
+     ============================================================ */
+  vistaCliente.hidden = IS_ADMIN_VIEW;
+  vistaAdmin.hidden = true;  // se revela solo tras confirmar sesión (sección 15B)
+  vistaLogin.hidden = true;  // idem
+
+  populateOficinas();
+
+  // La Oficina Comercial de la vista pública NO es un campo: es puramente
+  // informativa y viene exclusivamente del parámetro ?oficina= de la URL
+  // (el QR de cada oficina). Sin ese parámetro no se puede guardar.
+  if (QR_OFICINA) {
+    oficinaDetectedText.textContent = QR_OFICINA;
+    oficinaDetected.hidden = false;
+    oficinaMissing.hidden = true;
+    btnCGuardar.disabled = false;
+  } else {
+    oficinaDetected.hidden = true;
+    oficinaMissing.hidden = false;
+    btnCGuardar.disabled = true;
+  }
+
+  // La vista administrativa exige sesión (ver sección 15B) antes de
+  // mostrar nada y antes de consultar Registros_Contactos en Supabase.
+  if (IS_ADMIN_VIEW) {
+    initAdminAuth();
+  } else {
+    render();
+  }
+})();
+</script>
+</body>
+</html>
