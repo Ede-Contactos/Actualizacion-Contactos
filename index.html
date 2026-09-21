@@ -185,6 +185,21 @@
   input.invalid,select.invalid{border-color:var(--danger);}
   .field-error{color:var(--danger);font-size:12.5px;font-weight:600;min-height:1px;}
 
+  /* Selector Sí/No para "¿Es usted el titular del contrato?" */
+  .radio-toggle{display:flex;gap:10px;}
+  .radio-pill{
+    flex:1;position:relative;
+    display:flex;align-items:center;justify-content:center;
+    padding:12px 14px;border-radius:var(--radius-md);
+    border:1.5px solid var(--border);background:var(--navy-50);
+    cursor:pointer;transition:border-color .15s, background .15s, box-shadow .15s;
+  }
+  .radio-pill input[type="radio"]{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;}
+  .radio-pill span{font-size:15px;font-weight:700;color:var(--text);pointer-events:none;}
+  .radio-pill.selected{background:var(--navy-600);border-color:var(--navy-600);box-shadow:0 4px 10px rgba(27,87,166,0.22);}
+  .radio-pill.selected span{color:#fff;}
+  .radio-toggle.invalid .radio-pill{border-color:var(--danger);}
+
   .btn-primary{
     display:inline-flex;align-items:center;justify-content:center;gap:8px;
     background:linear-gradient(135deg,var(--accent-600),var(--accent-500));
@@ -380,9 +395,24 @@
         </div>
 
         <div class="field">
-          <label for="c-telefono">Teléfono / Celular</label>
+          <label for="c-telefono">Teléfono / Celular<span class="req">*</span></label>
           <input type="tel" id="c-telefono" placeholder="Ej. 809-555-1234" inputmode="numeric" maxlength="12" autocomplete="tel">
           <p class="field-error" id="c-err-telefono"></p>
+        </div>
+
+        <div class="field">
+          <label>¿Es usted el titular del contrato?<span class="req">*</span></label>
+          <div class="radio-toggle" id="c-titular-group">
+            <label class="radio-pill">
+              <input type="radio" name="c-titular" value="si">
+              <span>Sí</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="c-titular" value="no">
+              <span>No</span>
+            </label>
+          </div>
+          <p class="field-error" id="c-err-titular"></p>
         </div>
 
         <div class="field">
@@ -467,6 +497,21 @@
         </div>
 
         <div class="field" style="margin-top:14px;">
+          <label>¿Es titular del contrato?<span class="req">*</span></label>
+          <div class="radio-toggle" id="titular-group">
+            <label class="radio-pill">
+              <input type="radio" name="titular" value="si">
+              <span>Sí</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="titular" value="no">
+              <span>No</span>
+            </label>
+          </div>
+          <p class="field-error" id="err-titular"></p>
+        </div>
+
+        <div class="field" style="margin-top:14px;">
           <label for="oficina">Oficina</label>
           <select id="oficina" name="oficina">
             <option value="">Seleccione una oficina</option>
@@ -511,6 +556,14 @@
           <select id="filtroOficina"><option value="">Todas</option></select>
         </div>
         <div class="field">
+          <label for="filtroTitular">Titular del contrato</label>
+          <select id="filtroTitular">
+            <option value="">Todos</option>
+            <option value="si">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="field">
           <label for="filtroFecha">Fecha</label>
           <input type="date" id="filtroFecha">
         </div>
@@ -529,13 +582,14 @@
               <th>Nombre del cliente</th>
               <th>Correo</th>
               <th>Teléfono</th>
+              <th>Titular</th>
               <th>Oficina</th>
               <th>Fecha/Hora</th>
               <th>Acción</th>
             </tr>
           </thead>
           <tbody id="tablaBody">
-            <tr class="empty-row"><td colspan="7">No hay registros aún.</td></tr>
+            <tr class="empty-row"><td colspan="8">No hay registros aún.</td></tr>
           </tbody>
         </table>
       </div>
@@ -738,17 +792,26 @@
         correo: row.CORREO,
         telefono: row.TELEFONO,
         oficina: row.OFICINA,
+        titularContrato: row.TITULAR_CONTRATO,
         fechaHora: row.fecha_hora ? new Date(row.fecha_hora) : new Date()
       };
     }
     function mapDataToRow(data) {
-      return {
+      var row = {
         NIC: data.nic,
         NOMBRE: data.nombre,
         CORREO: data.correo,
         TELEFONO: data.telefono,
         OFICINA: data.oficina
       };
+      // Solo se incluye si es un booleano real (true/false). Si por algún
+      // motivo no viniera definido, se omite en vez de mandar un valor
+      // inválido — igual que fecha_hora se omite en update()/updateByNic()
+      // para no pisar lo que ya existe en la fila.
+      if (data.titularContrato === true || data.titularContrato === false) {
+        row.TITULAR_CONTRATO = data.titularContrato;
+      }
+      return row;
     }
 
     function getAll() {
@@ -826,7 +889,8 @@
           p_nic: norm,
           p_nombre: data.nombre,
           p_correo: data.correo,
-          p_telefono: data.telefono
+          p_telefono: data.telefono,
+          p_titular_contrato: data.titularContrato
         })
         .then(function (res) {
           if (res.error) throw res.error;
@@ -844,7 +908,8 @@
             records[idx] = Object.assign({}, records[idx], {
               nombre: data.nombre,
               correo: data.correo,
-              telefono: data.telefono
+              telefono: data.telefono,
+              titularContrato: data.titularContrato
             });
           }
           return true;
@@ -967,12 +1032,27 @@
     return digits;
   }
 
-  function validateForm(data) {
+  // opts.requireTelefono: true únicamente en el formulario público (ver
+  // el envío del formulario de la vista cliente, sección 12B). En el
+  // panel administrativo el teléfono sigue siendo opcional, sin cambios.
+  function validateForm(data, opts) {
+    opts = opts || {};
     var errors = {};
     if (!data.nic) errors.nic = 'El NIC es obligatorio.';
     if (!data.nombre) errors.nombre = 'El nombre del cliente es obligatorio.';
     if (data.correo && !isEmailValid(data.correo)) errors.correo = 'Ingrese un correo electrónico válido.';
-    if (data.telefono && !isPhoneValid(data.telefono)) errors.telefono = 'Ingrese un teléfono válido de 10 dígitos.';
+    if (opts.requireTelefono && !data.telefono) {
+      errors.telefono = 'El teléfono es obligatorio.';
+    } else if (data.telefono && !isPhoneValid(data.telefono)) {
+      errors.telefono = 'Ingrese un teléfono válido de 10 dígitos.';
+    }
+    // Obligatorio en ambos formularios: la tabla exige TITULAR_CONTRATO
+    // (NOT NULL) desde el momento en que se agregó esta columna, así que
+    // toda creación de registro —también desde el panel admin— necesita
+    // esta selección.
+    if (data.titularContrato !== true && data.titularContrato !== false) {
+      errors.titular = 'Seleccione si es el titular del contrato.';
+    }
     return errors;
   }
 
@@ -1014,6 +1094,7 @@
 
   var buscarInput = document.getElementById('buscar');
   var filtroOficina = document.getElementById('filtroOficina');
+  var filtroTitular = document.getElementById('filtroTitular');
   var filtroFecha = document.getElementById('filtroFecha');
   var btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
 
@@ -1066,6 +1147,10 @@
   var btnLoginSubmit = document.getElementById('btnLoginSubmit');
   var btnLogout = document.getElementById('btnLogout');
 
+  // --- "¿Es titular del contrato?" (grupos de radio Sí/No) ---
+  var titularGroupEl = document.getElementById('titular-group');
+  var cTitularGroupEl = document.getElementById('c-titular-group');
+
   function attachPhoneMask(input) {
     input.addEventListener('input', function () {
       var start = this.selectionStart;
@@ -1078,6 +1163,46 @@
   }
   attachPhoneMask(inputTelefono);
   attachPhoneMask(inputCTelefono);
+
+  // Selector visual tipo pastilla para "¿Es titular del contrato?". El
+  // estado real sigue siendo el radio nativo (accesible, funciona sin
+  // JS para el envío del formulario); la clase "selected" solo controla
+  // el estilo visual del botón elegido.
+  function attachRadioToggle(groupEl) {
+    if (!groupEl) return;
+    var pills = groupEl.querySelectorAll('.radio-pill');
+    pills.forEach(function (pill) {
+      var input = pill.querySelector('input[type="radio"]');
+      input.addEventListener('change', function () {
+        pills.forEach(function (p) { p.classList.remove('selected'); });
+        if (input.checked) pill.classList.add('selected');
+      });
+    });
+  }
+  attachRadioToggle(titularGroupEl);
+  attachRadioToggle(cTitularGroupEl);
+
+  // Lee el valor seleccionado de un grupo de radios por su atributo
+  // "name" y lo convierte a booleano. Devuelve null si no hay selección
+  // (formulario aún sin completar esa pregunta).
+  function getRadioBoolValue(name) {
+    var checked = document.querySelector('input[name="' + name + '"]:checked');
+    if (!checked) return null;
+    return checked.value === 'si';
+  }
+  // Marca el radio correspondiente a un valor booleano (o ninguno si es
+  // null/undefined) y sincroniza el estilo visual de la pastilla.
+  function setRadioBoolValue(name, boolValue) {
+    var value = boolValue === true ? 'si' : (boolValue === false ? 'no' : '');
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function (r) {
+      r.checked = value !== '' && r.value === value;
+      var pill = r.closest('.radio-pill');
+      if (pill) pill.classList.toggle('selected', r.checked);
+    });
+  }
+  function clearRadioSelection(name) {
+    setRadioBoolValue(name, null);
+  }
 
   var editingId = null;
   var pendingSaveData = null;
@@ -1141,9 +1266,16 @@
       document.getElementById('err-' + key).textContent = '';
       fieldInputs[key].classList.remove('invalid');
     });
+    document.getElementById('err-titular').textContent = '';
+    if (titularGroupEl) titularGroupEl.classList.remove('invalid');
   }
   function showFieldErrors(errors) {
     Object.keys(errors).forEach(function (key) {
+      if (key === 'titular') {
+        document.getElementById('err-titular').textContent = errors.titular;
+        if (titularGroupEl) titularGroupEl.classList.add('invalid');
+        return;
+      }
       var el = document.getElementById('err-' + key);
       if (el) el.textContent = errors[key];
       if (fieldInputs[key]) fieldInputs[key].classList.add('invalid');
@@ -1159,12 +1291,14 @@
       nombre: inputNombre.value.trim(),
       correo: inputCorreo.value.trim(),
       telefono: inputTelefono.value.trim(),
-      oficina: selectOficina.value
+      oficina: selectOficina.value,
+      titularContrato: getRadioBoolValue('titular')
     };
   }
 
   function resetForm() {
     form.reset();
+    clearRadioSelection('titular');
     clearFieldErrors();
     editingId = null;
     editBanner.hidden = true;
@@ -1176,6 +1310,7 @@
     inputCorreo.value = rec.correo;
     inputTelefono.value = rec.telefono;
     selectOficina.value = rec.oficina;
+    setRadioBoolValue('titular', rec.titularContrato);
     clearFieldErrors();
     editingId = rec.id;
     editBannerText.textContent = 'Editando registro — NIC ' + rec.nic;
@@ -1333,9 +1468,16 @@
       document.getElementById('c-err-' + key).textContent = '';
       clienteFieldInputs[key].classList.remove('invalid');
     });
+    document.getElementById('c-err-titular').textContent = '';
+    if (cTitularGroupEl) cTitularGroupEl.classList.remove('invalid');
   }
   function showClienteFieldErrors(errors) {
     Object.keys(errors).forEach(function (key) {
+      if (key === 'titular') {
+        document.getElementById('c-err-titular').textContent = errors.titular;
+        if (cTitularGroupEl) cTitularGroupEl.classList.add('invalid');
+        return;
+      }
       var el = document.getElementById('c-err-' + key);
       if (el) el.textContent = errors[key];
       if (clienteFieldInputs[key]) clienteFieldInputs[key].classList.add('invalid');
@@ -1347,7 +1489,8 @@
       nombre: inputCNombre.value.trim(),
       correo: inputCCorreo.value.trim(),
       telefono: inputCTelefono.value.trim(),
-      oficina: QR_OFICINA // la oficina proviene EXCLUSIVAMENTE del parámetro ?oficina= de la URL
+      oficina: QR_OFICINA, // la oficina proviene EXCLUSIVAMENTE del parámetro ?oficina= de la URL
+      titularContrato: getRadioBoolValue('c-titular')
     };
   }
   // Solo limpia los datos propios de cada visita; la oficina identificada
@@ -1357,6 +1500,7 @@
     inputCNombre.value = '';
     inputCCorreo.value = '';
     inputCTelefono.value = '';
+    clearRadioSelection('c-titular');
     clearClienteFieldErrors();
   }
   function showClienteSuccess() {
@@ -1377,7 +1521,7 @@
     }
 
     var data = readClienteFormData();
-    var errors = validateForm(data);
+    var errors = validateForm(data, { requireTelefono: true });
     if (Object.keys(errors).length) {
       showClienteFieldErrors(errors);
       return;
@@ -1425,6 +1569,7 @@
   function getFilteredRecords() {
     var texto = buscarInput.value.trim().toLowerCase();
     var oficina = filtroOficina.value;
+    var titular = filtroTitular.value; // '', 'si', 'no'
     var fecha = filtroFecha.value;
 
     return dataStore.getAll()
@@ -1434,19 +1579,22 @@
           if (!match) return false;
         }
         if (oficina && r.oficina !== oficina) return false;
+        if (titular === 'si' && r.titularContrato !== true) return false;
+        if (titular === 'no' && r.titularContrato !== false) return false;
         if (fecha && formatFechaISO(r.fechaHora) !== fecha) return false;
         return true;
       })
       .sort(function (a, b) { return b.fechaHora - a.fechaHora; });
   }
 
-  [buscarInput, filtroOficina, filtroFecha].forEach(function (el) {
+  [buscarInput, filtroOficina, filtroTitular, filtroFecha].forEach(function (el) {
     el.addEventListener('input', renderTabla);
     el.addEventListener('change', renderTabla);
   });
   btnLimpiarFiltros.addEventListener('click', function () {
     buscarInput.value = '';
     filtroOficina.value = '';
+    filtroTitular.value = '';
     filtroFecha.value = '';
     renderTabla();
   });
@@ -1469,7 +1617,7 @@
     var total = dataStore.getAll().length;
 
     if (rows.length === 0) {
-      tablaBody.innerHTML = '<tr class="empty-row"><td colspan="7">' +
+      tablaBody.innerHTML = '<tr class="empty-row"><td colspan="8">' +
         (total === 0 ? 'No hay registros aún. Complete el formulario para agregar el primero.' : 'Ningún registro coincide con los filtros aplicados.') +
         '</td></tr>';
     } else {
@@ -1479,6 +1627,7 @@
           '<td>' + escapeHtml(r.nombre) + '</td>' +
           '<td class="' + (r.correo ? '' : 'muted-cell') + '">' + (escapeHtml(r.correo) || 'Sin correo') + '</td>' +
           '<td class="' + (r.telefono ? '' : 'muted-cell') + '">' + (escapeHtml(r.telefono) || 'Sin teléfono') + '</td>' +
+          '<td>' + (r.titularContrato ? 'Sí' : 'No') + '</td>' +
           '<td class="' + (r.oficina ? '' : 'muted-cell') + '">' + (escapeHtml(r.oficina) || 'Sin oficina') + '</td>' +
           '<td>' + formatFechaHora(r.fechaHora) + '</td>' +
           '<td><div class="actions-cell">' +
@@ -1514,14 +1663,14 @@
   }
 
   function buildCSV(records) {
-    var header = ['NIC', 'Nombre del Cliente', 'Correo', 'Teléfono', 'Oficina', 'Fecha/Hora'];
+    var header = ['NIC', 'Nombre del Cliente', 'Correo', 'Teléfono', 'Titular del Contrato', 'Oficina', 'Fecha/Hora'];
     var lines = [header.map(csvEscape).join(',')];
     records
       .slice()
       .sort(function (a, b) { return b.fechaHora - a.fechaHora; })
       .forEach(function (r) {
         lines.push([
-          r.nic, r.nombre, r.correo, r.telefono, r.oficina, formatFechaHora(r.fechaHora)
+          r.nic, r.nombre, r.correo, r.telefono, (r.titularContrato ? 'Sí' : 'No'), r.oficina, formatFechaHora(r.fechaHora)
         ].map(csvEscape).join(','));
       });
     return '﻿' + lines.join('\r\n');
